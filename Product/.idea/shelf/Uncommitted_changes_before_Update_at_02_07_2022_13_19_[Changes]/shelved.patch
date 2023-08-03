@@ -1,0 +1,54 @@
+Index: .idea/dataSources.local.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"dataSourceStorageLocal\" created-in=\"IU-221.5080.210\">\r\n    <data-source name=\"PostgreSQL - postgres@localhost\" uuid=\"1853976a-2df6-4f82-936b-f84b22667251\">\r\n      <database-info product=\"PostgreSQL\" version=\"14.1\" jdbc-version=\"4.2\" driver-name=\"PostgreSQL JDBC Driver\" driver-version=\"42.3.3\" dbms=\"POSTGRES\" exact-version=\"14.1\" exact-driver-version=\"42.3\">\r\n        <identifier-quote-string>&quot;</identifier-quote-string>\r\n      </database-info>\r\n      <case-sensitivity plain-identifiers=\"lower\" quoted-identifiers=\"exact\" />\r\n      <secret-storage>master_key</secret-storage>\r\n      <user-name>postgres</user-name>\r\n      <schema-mapping>\r\n        <introspection-scope>\r\n          <node kind=\"database\" qname=\"@\">\r\n            <node kind=\"schema\" qname=\"@\" />\r\n          </node>\r\n        </introspection-scope>\r\n      </schema-mapping>\r\n    </data-source>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/dataSources.local.xml b/.idea/dataSources.local.xml
+--- a/.idea/dataSources.local.xml	
++++ b/.idea/dataSources.local.xml	
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="dataSourceStorageLocal" created-in="IU-221.5080.210">
++  <component name="dataSourceStorageLocal" created-in="IU-221.5921.22">
+     <data-source name="PostgreSQL - postgres@localhost" uuid="1853976a-2df6-4f82-936b-f84b22667251">
+       <database-info product="PostgreSQL" version="14.1" jdbc-version="4.2" driver-name="PostgreSQL JDBC Driver" driver-version="42.3.3" dbms="POSTGRES" exact-version="14.1" exact-driver-version="42.3">
+         <identifier-quote-string>&quot;</identifier-quote-string>
+Index: the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PreprogrammedCommandFetcher.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package nl.saxion.ptbc.frog_pilot;\r\n\r\nimport java.sql.ResultSet;\r\nimport java.sql.SQLException;\r\nimport java.util.ArrayList;\r\n\r\npublic abstract class PreprogrammedCommandFetcher {\r\n    /**\r\n     * Will take missionName as paramater and get commands linked to the mission\r\n     * and return ArrayList of the commands to be executed\r\n     * @param missionName\r\n     * @return commands\r\n     */\r\n    public static ArrayList<String> getMissionCommands(String missionName){\r\n        ArrayList<String> commands = new ArrayList<>();\r\n        PilotDB db = new PilotDB();\r\n        String sqlQuery = \"SELECT c.command FROM \\\"Missions\\\" m INNER JOIN \\\"Commands\\\" c ON c.mission_id = m.\\\"ID\\\" WHERE m.mission_name = \"+\"'\"+missionName+\"'\";\r\n        try {\r\n            ResultSet result = db.connect().createStatement().executeQuery(sqlQuery);\r\n            while (result.next()){\r\n                commands.add(result.getString(1));\r\n            }\r\n        } catch (SQLException e) {\r\n            throw new RuntimeException(e);\r\n        }\r\n        return commands;\r\n    }\r\n}\r\n
+===================================================================
+diff --git a/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PreprogrammedCommandFetcher.java b/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PreprogrammedCommandFetcher.java
+--- a/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PreprogrammedCommandFetcher.java	
++++ b/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PreprogrammedCommandFetcher.java	
+@@ -14,11 +14,25 @@
+     public static ArrayList<String> getMissionCommands(String missionName){
+         ArrayList<String> commands = new ArrayList<>();
+         PilotDB db = new PilotDB();
+-        String sqlQuery = "SELECT c.command FROM \"Missions\" m INNER JOIN \"Commands\" c ON c.mission_id = m.\"ID\" WHERE m.mission_name = "+"'"+missionName+"'";
++        String sqlQuery = "SELECT c.command FROM missions m INNER JOIN commands c ON c.mission_id = m.\"ID\" WHERE m.mission_name = "+"'"+missionName+"'";
+         try {
+             ResultSet result = db.connect().createStatement().executeQuery(sqlQuery);
+             while (result.next()){
+-                commands.add(result.getString(1));
++                String command = result.getString(1);
++                String[] dbCommand = command.split(" ");
++                if(dbCommand[0].equalsIgnoreCase("PILOT") && dbCommand[1].equalsIgnoreCase("DRIVE") && dbCommand.length == 5){
++                    String valiadedCommand = "";
++                    for(int i = 0;i < dbCommand.length;i++){
++                        if(i == 0 || i == 1){
++                            valiadedCommand += dbCommand[i].toUpperCase() + " ";
++                        }else{
++                            valiadedCommand += dbCommand[i] + " ";
++                        }
++                    }
++                    commands.add(valiadedCommand);
++                }else{
++                    throw new IllegalArgumentException("Invalid command: "+command);
++                }
+             }
+         } catch (SQLException e) {
+             throw new RuntimeException(e);

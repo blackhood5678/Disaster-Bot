@@ -1,0 +1,424 @@
+Index: ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package nl.saxion.ptbc.ground_control;\r\n\r\nimport nl.saxion.ptbc.shared.Database;\r\nimport nl.saxion.ptbc.sockets.SasaClient;\r\nimport nl.saxion.ptbc.sockets.SasaConnectionException;\r\nimport nl.saxion.ptbc.sockets.SasaSocketInformation;\r\n\r\n\r\n/**\r\n * Ground Control base class\r\n */\r\npublic class GroundControl implements SasaSocketInformation {\r\n    private final SasaClient sasaClient;\r\n\r\n    public GroundControl(String host, int port) throws SasaConnectionException {\r\n        // Setup server\r\n        sasaClient = new SasaClient();\r\n        sasaClient.subscribe(this);\r\n        sasaClient.connect(host , port);\r\n        System.out.println(\"Ground Control is connected to \" + host + \":\" + port);\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        try {\r\n            GroundControl thePilot = new GroundControl(\"localhost\", 50000); // Setup client to connect to ThePilot on this computer\r\n            //TODO create the dashboard\r\n            Database db = new Database();\r\n            db.connect();//using this command u can make connection to the DB just add after connect the method you will need\r\n\r\n        } catch (SasaConnectionException exception) {\r\n            System.err.println(\"Connection error: \" + exception.getMessage());\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void receivedData(String message) {\r\n        //TODO what to do when a message is received?\r\n    }\r\n\r\n    @Override\r\n    public void statusUpdate(String client, String status) {\r\n        //TODO what to do when the server accepts (or disconnects)?\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java b/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java
+--- a/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java	(date 1654595200989)
+@@ -1,17 +1,28 @@
+ package nl.saxion.ptbc.ground_control;
+ 
+-import nl.saxion.ptbc.shared.Database;
++import javax.swing.*;
++import javax.swing.text.BadLocationException;
++import javax.swing.text.Document;
++import javax.swing.text.SimpleAttributeSet;
++import javax.swing.text.StyleConstants;
++
+ import nl.saxion.ptbc.sockets.SasaClient;
+ import nl.saxion.ptbc.sockets.SasaConnectionException;
+ import nl.saxion.ptbc.sockets.SasaSocketInformation;
+ 
++import java.awt.*;
++import java.awt.event.ActionEvent;
++import java.awt.event.ActionListener;
++
+ 
+ /**
+  * Ground Control base class
+  */
+ public class GroundControl implements SasaSocketInformation {
++    private static int buttonPress = 0;
+     private final SasaClient sasaClient;
+ 
++
+     public GroundControl(String host, int port) throws SasaConnectionException {
+         // Setup server
+         sasaClient = new SasaClient();
+@@ -20,16 +31,146 @@
+         System.out.println("Ground Control is connected to " + host + ":" + port);
+     }
+ 
+-    public static void main(String[] args) {
++    public static void main(String[] args) throws BadLocationException {
+         try {
+             GroundControl thePilot = new GroundControl("localhost", 50000); // Setup client to connect to ThePilot on this computer
+-            //TODO create the dashboard
+-            Database db = new Database();
++
++            GroundControlDB db = new GroundControlDB();
+             db.connect();//using this command u can make connection to the DB just add after connect the method you will need
+ 
+         } catch (SasaConnectionException exception) {
+             System.err.println("Connection error: " + exception.getMessage());
+         }
++
++        //UI Main Menu
++        //JFrame
++        JFrame mainMenuFrame =new JFrame("Ground Control Menu");
++
++        //Welcome text
++
++
++        //Main menu buttons
++        JButton b1=new JButton("Drive to Location");
++        b1.setBounds(100,100,200, 40);
++
++        JButton b2=new JButton("Create Missions");
++        b2.setBounds(100,150,200, 40);
++
++        JButton b3=new JButton("Request Map");
++        b3.setBounds(100,200,200, 40);
++
++        JButton b4=new JButton("Display Map");
++        b4.setBounds(100,250,200, 40);
++
++        JButton b5=new JButton("Export Data");
++        b5.setBounds(100,300,200, 40);
++
++        JButton b6=new JButton("Import Data");
++        b6.setBounds(100,350,200, 40);
++
++
++        //Adding main menu buttons
++        mainMenuFrame.add(b1);
++        mainMenuFrame.add(b2);
++        mainMenuFrame.add(b3);
++        mainMenuFrame.add(b4);
++        mainMenuFrame.add(b5);
++        mainMenuFrame.add(b6);
++
++        //Setting frame size
++        mainMenuFrame.setSize(400,500);
++        mainMenuFrame.setLayout(null);
++        mainMenuFrame.setVisible(true);
++
++        //B1 Action
++        b1.addActionListener(new ActionListener() {
++            @Override
++            public void actionPerformed(ActionEvent e) {
++                JFrame driveFrame =new JFrame("Drive to Location");
++
++                //Add X, Y, Z text field for operator to enter coordinates
++                JTextField X,Y,Z;
++                X=new JTextField("Enter X coordinate");
++                X.setBounds(50,100, 200,30);
++                Y=new JTextField("Enter Y coordinate");
++                Y.setBounds(50,150, 200,30);
++                Z=new JTextField("Enter Z coordinate");
++                Z.setBounds(50, 200, 200, 30);
++                driveFrame.add(X); driveFrame.add(Y); driveFrame.add(Z);
++                driveFrame.setSize(400,400);
++                driveFrame.setLayout(null);
++                driveFrame.setVisible(true);
++
++                //Submit button to submit coordinates
++                JButton submit=new JButton("Submit");
++                submit.setBounds(100,250,100, 40);
++
++                driveFrame.add(submit);
++
++                //submit button action
++                submit.addActionListener(new ActionListener() {
++                    @Override
++                    public void actionPerformed(ActionEvent e) {
++                        //Calculate end route
++                    }
++                });
++
++
++            }
++        });
++
++        //B2 action
++        b2.addActionListener(new ActionListener() {
++            @Override
++            public void actionPerformed(ActionEvent e) {
++                JFrame createMissionFrame =new JFrame("Create Mission");
++                createMissionFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
++
++
++                //Mission name and command text fields
++                JTextField missionName, command1;
++                missionName=new JTextField("Enter mission name");
++                missionName.setBounds(50,50, 200,30);
++                command1=new JTextField("Enter command");
++                command1.setBounds(50,100, 200,30);
++
++                createMissionFrame.add(missionName); createMissionFrame.add(command1);
++                createMissionFrame.setSize(600,600);
++                createMissionFrame.setLayout(null);
++                createMissionFrame.setVisible(true);
++
++
++
++                //Add the 2 buttons
++                //Button for another command
++                JButton newCommand = new JButton("Add new command");
++                newCommand.setBounds(100,450,150, 40);
++
++                createMissionFrame.add(newCommand);
++
++
++                newCommand.addActionListener(new ActionListener() {
++                    @Override
++                    public void actionPerformed(ActionEvent e) {
++
++                        JTextField command2;
++                        command2=new JTextField("Enter another command");
++                        command2.setBounds(50,150+buttonPress*50, 200,30);
++                        buttonPress++;
++
++                        createMissionFrame.add(command2);
++
++
++                    }
++                });
++
++                //Submit button
++                JButton submitMission = new JButton("Submit");
++                submitMission.setBounds(100, 500, 150, 40);
++
++                createMissionFrame.add(submitMission);
++            }
++        });
+     }
+ 
+     @Override
+Index: ground_control/src/nl/saxion/ptbc/ground_control/Database.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/ground_control/src/nl/saxion/ptbc/ground_control/Database.java b/ground_control/src/nl/saxion/ptbc/ground_control/GroundControlDB.java
+rename from ground_control/src/nl/saxion/ptbc/ground_control/Database.java
+rename to ground_control/src/nl/saxion/ptbc/ground_control/GroundControlDB.java
+--- a/ground_control/src/nl/saxion/ptbc/ground_control/Database.java	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/ground_control/src/nl/saxion/ptbc/ground_control/GroundControlDB.java	(date 1654594583025)
+@@ -4,10 +4,10 @@
+ import java.sql.DriverManager;
+ import java.sql.SQLException;
+ 
+-public class Database {
++public class GroundControlDB {
+     private final String url = "jdbc:postgresql://localhost/GroundControl";
+     private final String user = "postgres";
+-    private final String password = "1234";
++    private final String password = "1993";
+ 
+     /**
+      * Connect to the PostgreSQL database
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"JavadocGenerationManager\">\r\n    <option name=\"OUTPUT_DIRECTORY\" value=\"$PROJECT_DIR$/javadoc\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_15\" default=\"true\" project-jdk-name=\"16\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/out\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/.idea/misc.xml	(date 1654594583186)
+@@ -3,7 +3,7 @@
+   <component name="JavadocGenerationManager">
+     <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/javadoc" />
+   </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_15" default="true" project-jdk-name="16" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" default="true" project-jdk-name="16" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: shared/src/nl/saxion/ptbc/shared/Database.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package nl.saxion.ptbc.shared;\r\n\r\nimport java.sql.Connection;\r\nimport java.sql.DriverManager;\r\nimport java.sql.SQLException;\r\n\r\npublic class Database {\r\n    private final String url = \"jdbc:postgresql://localhost/<DB_NAME>\";\r\n    private final String user = \"postgres\";\r\n    private final String password = \"<add your password>\";\r\n\r\n    /**\r\n     * Connect to the PostgreSQL database\r\n     *\r\n     * @return a Connection object\r\n     */\r\n    public Connection connect() {\r\n        Connection conn = null;\r\n        try {\r\n            conn = DriverManager.getConnection(url, user, password);\r\n            System.out.println(\"Connected to the PostgreSQL server successfully.\");\r\n        } catch (SQLException e) {\r\n            System.out.println(e.getMessage());\r\n        }\r\n\r\n        return conn;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/shared/src/nl/saxion/ptbc/shared/Database.java b/shared/src/nl/saxion/ptbc/shared/Database.java
+--- a/shared/src/nl/saxion/ptbc/shared/Database.java	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/shared/src/nl/saxion/ptbc/shared/Database.java	(date 1654594583211)
+@@ -7,7 +7,7 @@
+ public class Database {
+     private final String url = "jdbc:postgresql://localhost/<DB_NAME>";
+     private final String user = "postgres";
+-    private final String password = "<add your password>";
++    private final String password = "1234";
+ 
+     /**
+      * Connect to the PostgreSQL database
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"de6097ca-5a66-4000-9bff-b8f624f26766\" name=\"Changes\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/Database.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/shared/src/nl/saxion/ptbc/shared/Database.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/Database.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/misc.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/misc.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/ground_control/ground_control.iml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/ground_control/ground_control.iml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/shared/shared.iml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/shared/shared.iml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/the_frog_pilot/the_frog_pilot.iml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/the_frog_pilot/the_frog_pilot.iml\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"27ZAI2wZcG2fRJMWSormbH0troa\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"RunOnceActivity.OpenProjectViewOnStart\": \"true\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"WebServerToolWindowFactoryState\": \"false\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"project.structure.last.edited\": \"Modules\",\r\n    \"project.structure.proportion\": \"0.15\",\r\n    \"project.structure.side.proportion\": \"0.2\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RunManager\" selected=\"Application.ThePilot\">\r\n    <configuration name=\"GroundControl\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"nl.saxion.ptbc.ground_control.GroundControl\" />\r\n      <module name=\"ground_control\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"nl.saxion.ptbc.ground_control.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"ThePilot\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"nl.saxion.ptbc.frog_pilot.ThePilot\" />\r\n      <module name=\"the_frog_pilot\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"nl.saxion.ptbc.frog_pilot.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.ThePilot\" />\r\n        <item itemvalue=\"Application.GroundControl\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"de6097ca-5a66-4000-9bff-b8f624f26766\" name=\"Changes\" comment=\"\" />\r\n      <created>1649517154721</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1649517154721</updated>\r\n      <workItem from=\"1649517158322\" duration=\"995000\" />\r\n      <workItem from=\"1650441316193\" duration=\"1109000\" />\r\n      <workItem from=\"1650442862891\" duration=\"709000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"Added Sasa-communication JAR version 1_2 with sources and Javadoc.\" />\r\n    <MESSAGE value=\"Rebuild Sasa-communication JAR version 1_2. with Java 11 for better compatibility.\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Rebuild Sasa-communication JAR version 1_2. with Java 11 for better compatibility.\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/.idea/workspace.xml	(date 1654594583230)
+@@ -4,17 +4,16 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="de6097ca-5a66-4000-9bff-b8f624f26766" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/Database.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/shared/src/nl/saxion/ptbc/shared/Database.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/Database.java" afterDir="false" />
++    <list default="true" id="de6097ca-5a66-4000-9bff-b8f624f26766" name="Changes" comment="Rebuild Sasa-communication JAR version 1_2. with Java 11 for better compatibility.">
++      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/ground_control/ground_control.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ground_control/ground_control.iml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/GroundControlDB.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java" beforeDir="false" afterPath="$PROJECT_DIR$/ground_control/src/nl/saxion/ptbc/ground_control/GroundControl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/shared/shared.iml" beforeDir="false" afterPath="$PROJECT_DIR$/shared/shared.iml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/shared/src/nl/saxion/ptbc/shared/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/shared/src/nl/saxion/ptbc/shared/Database.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PilotDB.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java" beforeDir="false" afterPath="$PROJECT_DIR$/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/the_frog_pilot/the_frog_pilot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/the_frog_pilot/the_frog_pilot.iml" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -39,21 +38,17 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "RunOnceActivity.OpenProjectViewOnStart": "true",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "WebServerToolWindowFactoryState": "false",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "project.structure.last.edited": "Modules",
+-    "project.structure.proportion": "0.15",
+-    "project.structure.side.proportion": "0.2"
+-  }
+-}]]></component>
+-  <component name="RunManager" selected="Application.ThePilot">
++  <component name="PropertiesComponent">
++    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
++    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
++    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
++    <property name="WebServerToolWindowFactoryState" value="false" />
++    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
++    <property name="project.structure.last.edited" value="Modules" />
++    <property name="project.structure.proportion" value="0.15" />
++    <property name="project.structure.side.proportion" value="0.2" />
++  </component>
++  <component name="RunManager" selected="Application.GroundControl">
+     <configuration name="GroundControl" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+       <option name="MAIN_CLASS_NAME" value="nl.saxion.ptbc.ground_control.GroundControl" />
+       <module name="ground_control" />
+@@ -82,8 +77,8 @@
+     </configuration>
+     <recent_temporary>
+       <list>
++        <item itemvalue="Application.GroundControl" />
+         <item itemvalue="Application.ThePilot" />
+-        <item itemvalue="Application.GroundControl" />
+       </list>
+     </recent_temporary>
+   </component>
+@@ -98,6 +93,11 @@
+       <workItem from="1649517158322" duration="995000" />
+       <workItem from="1650441316193" duration="1109000" />
+       <workItem from="1650442862891" duration="709000" />
++      <workItem from="1652783766754" duration="1072000" />
++      <workItem from="1653931110162" duration="728000" />
++      <workItem from="1653934378369" duration="4773000" />
++      <workItem from="1654090891077" duration="18775000" />
++      <workItem from="1654590455593" duration="3351000" />
+     </task>
+     <servers />
+   </component>
+@@ -114,6 +114,7 @@
+         </entry>
+       </map>
+     </option>
++    <option name="oldMeFiltersMigrated" value="true" />
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="Added Sasa-communication JAR version 1_2 with sources and Javadoc." />
+Index: ground_control/ground_control.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module type=\"JAVA_MODULE\" version=\"4\">\r\n  <component name=\"NewModuleRootManager\" inherit-compiler-output=\"true\">\r\n    <exclude-output />\r\n    <content url=\"file://$MODULE_DIR$\">\r\n      <sourceFolder url=\"file://$MODULE_DIR$/resources\" type=\"java-resource\" />\r\n      <sourceFolder url=\"file://$MODULE_DIR$/src\" isTestSource=\"false\" />\r\n    </content>\r\n    <orderEntry type=\"inheritedJdk\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n    <orderEntry type=\"module\" module-name=\"shared\" />\r\n    <orderEntry type=\"library\" exported=\"\" name=\"libs\" level=\"project\" />\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/ground_control/ground_control.iml b/ground_control/ground_control.iml
+--- a/ground_control/ground_control.iml	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/ground_control/ground_control.iml	(date 1654594583257)
+@@ -5,6 +5,7 @@
+     <content url="file://$MODULE_DIR$">
+       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
++      <sourceFolder url="file://$MODULE_DIR$" type="java-resource" />
+     </content>
+     <orderEntry type="inheritedJdk" />
+     <orderEntry type="sourceFolder" forTests="false" />
+Index: .idea/runConfigurations.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/runConfigurations.xml b/.idea/runConfigurations.xml
+new file mode 100644
+--- /dev/null	(date 1654594583116)
++++ b/.idea/runConfigurations.xml	(date 1654594583116)
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="RunConfigurationProducerService">
++    <option name="ignoredProducers">
++      <set>
++        <option value="com.android.tools.idea.compose.preview.runconfiguration.ComposePreviewRunConfigurationProducer" />
++      </set>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/Database.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/Database.java b/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PilotDB.java
+rename from the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/Database.java
+rename to the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PilotDB.java
+--- a/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/Database.java	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/PilotDB.java	(date 1654594583128)
+@@ -7,7 +7,7 @@
+ public class Database {
+     private final String url = "jdbc:postgresql://localhost/Pilot";
+     private final String user = "postgres";
+-    private final String password = "1234";
++    private final String password = "1993";
+ 
+     /**
+      * Connect to the PostgreSQL database
+Index: the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package nl.saxion.ptbc.frog_pilot;\r\n\r\nimport nl.saxion.ptbc.shared.Database;\r\nimport nl.saxion.ptbc.sockets.SasaServer;\r\nimport nl.saxion.ptbc.sockets.SasaSocketInformation;\r\n\r\n/**\r\n * The base class of The Pilot.\r\n */\r\npublic class ThePilot implements SasaSocketInformation {\r\n    private final SasaServer sasaServer;\r\n\r\n    public ThePilot(int port) {\r\n        // Setup server\r\n        sasaServer = new SasaServer();\r\n        sasaServer.subscribe(this);\r\n        sasaServer.listen(port);\r\n        System.out.println(\"The Pilot is listening on port \" + port);\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        ThePilot thePilot = new ThePilot(50000); // Setup server to listen to a connecting Frog\r\n        //TODO start The Frog\r\n        //TODO and create the dashboard\r\n        Database db = new Database();\r\n        db.connect();//using this command u can make connection to the DB just add after connect the method you will need\r\n    }\r\n\r\n    @Override\r\n    public void receivedData(String message) {\r\n        //TODO what to do when a message is received?\r\n    }\r\n\r\n    @Override\r\n    public void statusUpdate(String client, String status) {\r\n        //TODO what to do when a client like The Frog (dis)connects)?\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java b/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java
+--- a/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java	(revision 931191296e633d2e43b2010d74d72370eba86a0a)
++++ b/the_frog_pilot/src/nl/saxion/ptbc/frog_pilot/ThePilot.java	(date 1654594583271)
+@@ -1,6 +1,6 @@
+ package nl.saxion.ptbc.frog_pilot;
+ 
+-import nl.saxion.ptbc.shared.Database;
++
+ import nl.saxion.ptbc.sockets.SasaServer;
+ import nl.saxion.ptbc.sockets.SasaSocketInformation;
+ 
